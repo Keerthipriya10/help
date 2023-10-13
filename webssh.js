@@ -98,3 +98,31 @@ class App extends React.Component {
 }
 
 export default App;
+// Open a new window
+const newWindow = window.open('http://localhost:8888/', '_blank');
+
+// Wait for the new window to load
+newWindow.addEventListener('load', () => {
+    // Create the POST request headers
+    const headers = new Headers();
+    headers.append('Authorization', 'Bearer your_access_token');
+    headers.append('Custom-Header', 'custom-value');
+
+    // Create a FormData object if needed
+    const formData = new FormData();
+    formData.append('field1', 'value1');
+    formData.append('field2', 'value2');
+
+    // Make the POST request
+    fetch('http://localhost:8888/', {
+        method: 'POST',
+        headers: headers,
+        body: formData, // Include the FormData if needed
+    })
+    .then(response => {
+        // Handle the response here
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
