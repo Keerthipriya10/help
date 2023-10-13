@@ -32,3 +32,11 @@ handleConnect = () => {
   newWindow.document.body.appendChild(form);
   form.submit();
 };
+function extractXSRFToken(htmlSource) {
+    const xsrfTokenMatch = htmlSource.match(/name="_xsrf" value="([A-Za-z0-9-_]+)"/);
+    if (xsrfTokenMatch) {
+        return xsrfTokenMatch[1];
+    } else {
+        return null; // XSRF token not found in the HTML source
+    }
+}
