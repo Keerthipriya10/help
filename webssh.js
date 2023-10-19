@@ -1,6 +1,12 @@
 import React from 'react';
 
 class App extends React.Component {
+
+  const hasSpaces = /\s/.test(newText);
+
+    // Check for special characters using a regular expression
+    const hasSpecialChars = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\\-/|\\^]/.test(newText);
+
   state = {
     sshFormData: {
       hostname: 'example.com', // Replace with your SSH server's hostname
