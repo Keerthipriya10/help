@@ -1,0 +1,164 @@
+import React, { useEffect, useState } from 'react';
+import { Table, Button, Layout } from 'antd';
+import { Row, Col } from 'antd';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Accordion from './nestedTable';
+const data = [
+  {
+    title: 'parent 1',
+    key: '0-0',
+    children: [
+      {
+        title: 'parent 1-0',
+        key: '0-0-0',
+        children: [
+          { title: 'leaf 1-0-0', key: '0-0-0-0', children: [
+          { title: 'leaf 1-0-0-0', key: '0-0-0-0-0' },
+          { title: 'leaf 1-0-0-1', key: '0-0-0-0-1' },
+        ], },
+          { title: 'leaf 1-0-1', key: '0-0-0-1' },
+          { title: 'leaf 1-0-2', key: '0-0-0-2' },
+        ],
+      },
+      {
+        title: 'parent 1-1',
+        key: '0-0-1',
+        children: [
+          { title: 'leaf 1-1-0', key: '0-0-1-0' },
+        ],
+      },
+      {
+        title: 'parent 1-2',
+        key: '0-0-2',
+        children: [
+          { title: 'leaf 1-2-0', key: '0-0-2-0' },
+          { title: 'leaf 1-2-1', key: '0-0-2-1' },
+        ],
+      },
+    ],
+  },
+];
+const { Content } = Layout;
+function flattenTree(data) {
+  const result = [];
+  const spanCounts = {};
+  let keyCounter = 0;
+
+  function recurse(items, depth, parentTitles = [], indexMap = {}) {
+    let totalLeaves = 0;
+
+    items.forEach((item, i) => {
+      const currentTitles = [...parentTitles, item.title];
+      const currentKey = keyCounter;
+
+      // Initialize span counts if not present
+      if (!spanCounts[depth]) {
+        spanCounts[depth] = {};
+      }
+
+      // Add index mapping for the current item
+      indexMap[item.key] = currentKey;
+      let leavesCount = 0;
+      if (item.children) {
+        leavesCount = recurse(item.children, depth + 1, currentTitles, indexMap);
+        spanCounts[depth][currentKey] = leavesCount;
+      } else {
+        leavesCount = 1;
+        result.push({
+          key: currentKey,
+          ...currentTitles.reduce((acc, title, index) => ({
+            ...acc,
+            [index + 1]: title
+          }), {}),
+        });
+        keyCounter++;
+      }
+      
+      totalLeaves += leavesCount;
+    });
+
+    return totalLeaves;
+  }
+
+  recurse(data, 1);
+
+  // Ensure that each depth level has all the keys, including those with zero count
+
+  return { data: result, spanCounts };
+}
+
+
+function generateCols(spanCounts) {
+  const maxDepth = Math.max(...Object.keys(spanCounts).map(Number));
+  const cols = [];
+  
+  for (let i = 1; i <= maxDepth; i++) {
+    cols.push({
+      title: `Depth ${i}`,
+      dataIndex: i,
+      onCell: (record) => ({
+        rowSpan: (spanCounts[i] && spanCounts[i][record.key] !== undefined) ? spanCounts[i][record.key] : 1
+      })
+    });
+  }
+
+  return cols;
+}
+function addZeros(spanCounts, arrayLength ){
+//  const maxDepth = Object.keys(spanCounts).length ;
+const newSpanCounts = {};
+
+Object.keys(spanCounts).forEach(depth => {
+  const depthCounts = spanCounts[depth];
+  newSpanCounts[depth] = {};
+
+  const maxIndex = Math.max(...Object.keys(depthCounts).map(Number), -1);
+
+  for (let i = 0; i < arrayLength; i++) {
+    let isZero = false;
+
+    // Check if the current index should be 0
+    Object.keys(depthCounts).forEach(key => {
+      const keyValue = parseInt(key);
+      if (i > keyValue && i < keyValue + depthCounts[key]) {
+        isZero = true;
+      }
+    });
+
+    if (isZero) {
+      newSpanCounts[depth][i] = 0;
+    } else {
+      newSpanCounts[depth][i] = (i <= maxIndex) ? (depthCounts[i] ?? 1) : 1;
+    }
+  }
+});
+
+return newSpanCounts;
+}
+
+const HomePage = () => {
+ 
+  const { data: flattenedData, spanCounts } = flattenTree(data);
+  const spanCountsMod = addZeros(spanCounts,flattenedData.length );
+  const columns = generateCols(spanCountsMod);  
+  console.log(spanCountsMod);
+console.log(columns);
+console.log(flattenedData);
+  return (
+    <Layout>
+      <Content style={{ padding: '50px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <Button type="primary" style={{ marginRight: '10px' }}>Add USM</Button>
+          <Button type="danger">Delete USM</Button>
+        </div>
+        <Table dataSource={flattenedData} columns={columns} rowKey="key" />;
+        <Accordion />
+      </Content>
+    </Layout>
+  );
+};
+
+export default HomePage;
+
+
