@@ -1,0 +1,90 @@
+// src/components/SettingsPage.js
+import React from 'react';
+import { Row, Col, Card, Switch, DatePicker, InputNumber, Select, Space, List} from 'antd';
+import { useState } from 'react';
+
+const { Option } = Select;
+
+const SettingsPage = () => {
+  
+
+  return (
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+    <Row gutter={16} style={{ height: '100%' }}>
+      <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
+        <CategorySettings />
+      </Col>
+      <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
+        <MeasurementSettings />
+      </Col>
+    </Row>
+  </Space>
+  );
+};
+
+const CategorySettings = ()=>{
+  return <Card title="Data Collection Settings" bordered={false} style={{ height: '100%' }}>
+  <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <List>
+    <List.Item>
+      <span>Memory</span>
+      <Switch defaultChecked style={{ marginLeft: '8px' }} />
+    </List.Item>
+    <List.Item>
+      <span>CPU</span>
+      <Switch defaultChecked style={{ marginLeft: '8px' }} />
+    </List.Item>
+    <List.Item>
+      <span>Disk</span>
+      <Switch defaultChecked style={{ marginLeft: '8px' }} />
+    </List.Item>
+    <List.Item>
+      <span>NetDoctor</span>
+      <Switch defaultChecked style={{ marginLeft: '8px' }} />
+    </List.Item>
+
+    </List>
+    
+  </Space>
+</Card>
+}
+
+const MeasurementSettings = () => {
+  const [immediateMeasurement, setImmediateMeasurement] = useState(true);
+
+  const handleSwitchChange = (checked) => {
+    setImmediateMeasurement(checked);
+  };
+
+  return (
+    <Card title="Measurement Settings" bordered={false} style={{ height: '100%' }}>
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+         <List>
+
+         
+        <List.Item>
+          <span>Begin Measurement Immediately</span>
+          <Switch checked={immediateMeasurement} onChange={handleSwitchChange} style={{ marginLeft: '8px' }} />
+        </List.Item>
+        <List.Item>
+          <span>Fixed Measurement Time</span>
+          <DatePicker disabled={immediateMeasurement} showTime style={{ marginLeft: '8px' }} />
+        </List.Item>
+        <List.Item>
+          <span>Periodic Interval (minutes)</span>
+          <InputNumber min={1} max={60} defaultValue={10} style={{ marginLeft: '8px' }} />
+        </List.Item>
+        <List.Item>
+          <span>System Type</span>
+          <Select defaultValue="KDDI USM" style={{ width: 200, marginLeft: '8px' }}>
+            <Option value="KDDI USM">KDDI USM</Option>
+            <Option value="SKT USM">SKT USM</Option>
+            <Option value="VzW USM">VzW USM</Option>
+          </Select>
+        </List.Item>
+        </List> 
+      </Space>
+    </Card>
+  );
+};
+export default SettingsPage;
